@@ -1,0 +1,21 @@
+version: '3.2'
+services:
+  app:
+    build: .
+    ports:
+      - 8000:8000
+    environment:
+      - MONGO_URL=mongodb://mongodb:27017/db
+      - BLOCKCHAIN_NODE_URL=http://node:8545
+      - APP_ADDRESS=0x88032398beab20017e61064af3c7c8bd38f4c968
+      - PORT=8000
+  mongodb:
+    image: mongo:latest
+    expose:
+      - 27017
+  node:
+    image: reputationnetwork/node
+    expose:
+      - 8545
+    ports:
+      - 8545:8545

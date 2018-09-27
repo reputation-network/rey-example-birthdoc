@@ -1,0 +1,19 @@
+!!!
+%html{:lang => "en"}
+  %head
+    %meta{:charset => "utf-8"}/
+    %meta{:content => "width=device-width, initial-scale=1, shrink-to-fit=no", :name => "viewport"}/
+    %title Birthdoc app
+    %link{:href => "bootstrap.min.css", :rel => "stylesheet"}/
+    %link{:href => "cover.css", :rel => "stylesheet"}/
+  %body.text-center
+    .cover-container.d-flex.w-100.h-100.p-3.mx-auto.flex-column
+      %header.masthead.mb-auto
+        .inner
+          %h3.masthead-brand Birthdoc app
+      %main.inner.cover{:role => "main"}
+        = yield
+      %footer.mastfoot.mt-auto
+        .inner
+          %p
+            %a{:href => "http://github.com/reputation-network/rey-example-birthdoc", :target => "_blank"} View source code

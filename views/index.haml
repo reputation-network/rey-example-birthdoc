@@ -1,0 +1,39 @@
+%h1.cover-heading Share your verified birthdate.
+%p.lead This REY app lets you share your birthdate within the <a href="https://reputation.network">Reputation Network</a>
+%form{ action: "/upload", method: "post", enctype: "multipart/form-data" }
+  %p.lead
+    Upload your ID document (use this <a href="sample.jpg" target="_blank">test one if you like</a>) and sign it with <a href="http://metamask.io">MetaMask</a>:
+  %p.lead
+    %input.form-control{ type: "file", name: "file" }
+    %input.form-control{ type: "hidden", name: "signature" }
+  %a.btn.btn-lg.btn-secondary#sign Sign with MetaMask
+
+:javascript
+  function toHex(str) {
+    return str.split("").map((c) => c.charCodeAt(0).toString(16)).join("");
+  }
+  function requestUserSignString(str) {
+    return new Promise((resolve, reject) => {
+      const web3 = window.web3;
+      if (!web3 || !web3.currentProvider || !web3.currentProvider.isMetaMask) {
+        reject(new Error("MetaMask doesn't seem to be installed"));
+      }
+      const strHex = `0x${toHex(str)}`;
+      if (!web3.eth.defaultAccount) {
+        reject(new Error('Please log in to MetaMask'));
+      } else {
+        web3.personal.sign(strHex, web3.eth.defaultAccount, (err, signature) =>
+          err ? reject(err) : resolve(signature));
+      }
+    });
+  }
+  document.querySelector('#sign').addEventListener('click', ()=> {
+    let message = "#{MESSAGE}";
+    requestUserSignString(message).then((signature) => {
+      console.log(signature);
+      document.querySelector('input[name=signature]').value = signature;
+      document.querySelector('form').submit();
+    }).catch((error) => {
+      alert(error);
+    });
+  });
