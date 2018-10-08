@@ -2,23 +2,23 @@ require 'rtesseract'
 require 'sinatra'
 require 'sinatra/json'
 require 'haml'
-require 'byebug'
 require 'date'
 require 'mongo'
 require 'eth'
+require 'mrz'
 
 MANIFEST = {
   version: '1.0',
   name: 'Birthdoc',
   description: 'Stores your ID and shares your birth date',
-  homepage_url: ENV['HOMEPAGE_URL'] || 'http://localhost:8081',
+  homepage_url: ENV['HOMEPAGE_URL'] || 'http://localhost:8000',
   picture_url: ENV['PICTURE_URL'] || 'https://avatars1.githubusercontent.com/u/42174428?s=200&v=4',
   address: ENV['APP_ADDRESS'] || '0x88032398beab20017e61064af3c7c8bd38f4c968',
-  app_url: ENV['APP_URL'] || 'http://localhost:8081/data',
+  app_url: ENV['APP_URL'] || 'http://localhost:8000/data',
   app_reward: 0,
   app_dependencies: []
 }.freeze
-MESSAGE = 'I give permission to upload my ID'
+MESSAGE = 'I give permission to upload my birthdate, as stated on my Identity Document, to the Reputation Network'
 
 set :db, Mongo::Client.new(ENV['MONGO_URL'] || 'mongodb://127.0.0.1:27017/rey-id')
 
@@ -39,9 +39,9 @@ post '/upload' do
   File.open(path, 'wb') do |f|
     f.write(file.read)
     image = RTesseract.new(path)
-    data = dni_data(image.to_s)
+    data = mrz_data(image.to_s)
     if data
-      store_dni(settings.db, signature, data)
+      store_document(settings.db, signature, data)
       redirect '/done'
     else
       'no data found'
@@ -52,7 +52,7 @@ end
 get '/data' do
   subject = parse_subject_header(request.env)
   return status 404 unless subject
-  data = settings.db[:dnis].find(public_key: subject).first
+  data = settings.db[:documents].find(public_key: subject).first
   return status 404 unless data
   json data['data']
 end
@@ -61,29 +61,53 @@ get '/manifest' do
   json MANIFEST
 end
 
-def store_dni(db, signature, data)
-  public_key = Eth::Utils.public_key_to_address(Eth::Key.personal_recover(MESSAGE, signature))
-  db[:dnis].insert_one(public_key: public_key.downcase, data: data)
-end
-
 def parse_subject_header(headers)
   Base64.decode64(headers['HTTP_X_PERMISSION_SUBJECT'] || 'null').gsub(/\A"|"\Z/, '')
 end
 
-def birthdate_from_machine_readable_lines(lines)
-  date = Date._parse(lines[1][0..5])
+def mrz_data(text) # TODO also IDs
+  lines = mrz_lines(text)
+  if lines
+    data = MRZ.parse(lines)
+    if data && data.valid_birth_date?
+      {
+        document_code: data.document_code,
+        issuing_state: data.issuing_state,
+        birthdate: data.birth_date
+      }
+    end
+  end
+rescue MRZ::InvalidFormatError
+  # do nothing
+end
+
+def mrz_lines(text)
+  lines = text.split("\n")
+  first_mrz_line = lines.find { |line| (line.start_with?('ID') || line.start_with?('P<')) && line.size > 10 }
+  lines = text.split(first_mrz_line)[1].split("\n")
+  lines = lines.unshift(first_mrz_line)
+  clean_mrz_lines(lines)
+end
+
+def clean_mrz_lines(lines)
+  lines = lines.map { |line| line.strip }.select { |line| line.size > 10 }
+  lines = lines.map do |line|
+    line.split(' ').select { |part| part !~ /[a-z]/ }.join('') #lowercase characters invalid
+  end
+  if lines.size == 2
+    lines.map { |line| line[0..43] } # TD3 size so 44 characters max
+  elsif lines.size == 3
+    lines.map { |line| line[0..29] } # TD1 size so 30 characters max
+  end
+end
+
+def parse_mrz_birthdate(mrz_birthdate)
+  date = Date._parse(mrz_birthdate)
   date[:year] = date[:year] - 100 if date[:year] > Date.today.year
   date
 end
 
-def dni_data(text)
-  s = text.split('IDESP')
-  if s.size > 1
-    lines = s[1].split("\n")[0..2]
-    {
-      type: 'national_id',
-      country: 'es',
-      birthdate: birthdate_from_machine_readable_lines(lines)
-    }
-  end
+def store_document(db, signature, data)
+  public_key = Eth::Utils.public_key_to_address(Eth::Key.personal_recover(MESSAGE, signature))
+  db[:documents].insert_one(public_key: public_key.downcase, data: data)
 end

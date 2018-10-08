@@ -22,3 +22,5 @@ gem "eth", "~> 0.4.8"
 gem 'bigdecimal'
 
 gem 'thin'
+
+gem "mrz", "~> 0.2.0"
