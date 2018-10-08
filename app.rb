@@ -73,7 +73,7 @@ def mrz_data(text) # TODO also IDs
       {
         document_type: 'passport',
         nationality: data.nationality,
-        birthdate: data.date_of_birth.to_json
+        birthdate: data.date_of_birth
       }
     end
   end
