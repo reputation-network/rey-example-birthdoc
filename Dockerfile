@@ -5,7 +5,6 @@ ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
 RUN apt-get update && apt-get install -y curl patch bzip2 gawk g++ gcc make libc6-dev patch zlib1g-dev libyaml-dev libsqlite3-dev sqlite3 autoconf libgmp-dev libgdbm-dev libncurses5-dev automake libtool bison pkg-config libffi-dev libgmp-dev libreadline6-dev libssl-dev git python libmagickwand-dev libtesseract-dev libleptonica-dev tesseract-ocr libssl-dev sudo
-RUN curl -s https://bin.equinox.io/c/ekMN3bCZFUn/forego-stable-linux-amd64.tgz | tar xvfz - -C /usr/local/sbin
 
 ENV USER ubuntu
 ENV HOME /home/${USER}
