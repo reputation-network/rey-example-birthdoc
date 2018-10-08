@@ -36,7 +36,6 @@ GEM
       ffi
     mongo (2.6.2)
       bson (>= 4.3.0, < 5.0.0)
-    mrz (0.2.0)
     multi_json (1.13.1)
     mustermann (1.0.3)
     nokogiri (1.8.4)
@@ -84,7 +83,6 @@ DEPENDENCIES
   haml (~> 5.0)
   identification (~> 0.1.0)
   mongo (~> 2.6)
-  mrz (~> 0.2.0)
   rmagick (~> 2.16)
   rtesseract (~> 2.2)
   sinatra (~> 2.0)
