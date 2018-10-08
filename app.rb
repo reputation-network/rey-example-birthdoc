@@ -5,7 +5,7 @@ require 'haml'
 require 'date'
 require 'mongo'
 require 'eth'
-require 'mrz'
+require 'identification'
 
 MANIFEST = {
   version: '1.0',
@@ -67,23 +67,21 @@ end
 
 def mrz_data(text) # TODO also IDs
   lines = mrz_lines(text)
-  if lines
-    data = MRZ.parse(lines)
-    if data && data.valid_birth_date?
+  if lines and lines.size == 2
+    data = Identification::Passport.new(mrz_line_1: lines[0], mrz_line_2: lines[1])
+    if data && data.valid?
       {
-        document_code: data.document_code,
-        issuing_state: data.issuing_state,
-        birthdate: data.birth_date
+        document_type: 'passport',
+        nationality: data.nationality,
+        birthdate: data.date_of_birth.to_json
       }
     end
   end
-rescue MRZ::InvalidFormatError
-  # do nothing
 end
 
 def mrz_lines(text)
   lines = text.split("\n")
-  first_mrz_line = lines.find { |line| (line.start_with?('ID') || line.start_with?('P<')) && line.size > 10 }
+  first_mrz_line = lines.find { |line| line.start_with?('P<') && line.size > 10 }
   lines = text.split(first_mrz_line)[1].split("\n")
   lines = lines.unshift(first_mrz_line)
   clean_mrz_lines(lines)
@@ -94,11 +92,7 @@ def clean_mrz_lines(lines)
   lines = lines.map do |line|
     line.split(' ').select { |part| part !~ /[a-z]/ }.join('') #lowercase characters invalid
   end
-  if lines.size == 2
-    lines.map { |line| line[0..43] } # TD3 size so 44 characters max
-  elsif lines.size == 3
-    lines.map { |line| line[0..29] } # TD1 size so 30 characters max
-  end
+  lines.map { |line| line[0..43] } if lines.size == 2 # passport is TD3 format so 2 lines of 44 characters
 end
 
 def parse_mrz_birthdate(mrz_birthdate)
@@ -109,5 +103,6 @@ end
 
 def store_document(db, signature, data)
   public_key = Eth::Utils.public_key_to_address(Eth::Key.personal_recover(MESSAGE, signature))
-  db[:documents].insert_one(public_key: public_key.downcase, data: data)
+  pkey = public_key.downcase
+  db[:documents].update_one({ public_key: pkey }, { public_key: pkey, data: data }, upsert: true)
 end

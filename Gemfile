@@ -24,3 +24,5 @@ gem 'bigdecimal'
 gem 'thin'
 
 gem "mrz", "~> 0.2.0"
+
+gem "identification", "~> 0.1.0"

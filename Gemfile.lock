@@ -29,6 +29,7 @@ GEM
       tilt
     i18n (1.1.0)
       concurrent-ruby (~> 1.0)
+    identification (0.1.0)
     mini_portile2 (2.3.0)
     minitest (5.11.3)
     money-tree (0.10.0)
@@ -81,6 +82,7 @@ DEPENDENCIES
   byebug (~> 10.0)
   eth (~> 0.4.8)
   haml (~> 5.0)
+  identification (~> 0.1.0)
   mongo (~> 2.6)
   mrz (~> 0.2.0)
   rmagick (~> 2.16)
