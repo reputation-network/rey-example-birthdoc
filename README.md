@@ -1,7 +1,7 @@
 Birthdoc App
 ============
 
-Example REY app that lets users share in the Reputation Network their birth date, as extracted from their ID.
+Example REY app that lets users share in the Reputation Network their birth date, as extracted from their passports.
 
 Available live at http://rey-example-birthdoc.herokuapp.com.
 
