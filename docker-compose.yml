@@ -4,18 +4,32 @@ services:
     build: .
     ports:
       - 8000:8000
+    network_mode: host
     environment:
-      - MONGO_URL=mongodb://mongodb:27017/db
-      - BLOCKCHAIN_NODE_URL=http://node:8545
+      - MONGO_URL=mongodb://localhost:27017/db
+      - BLOCKCHAIN_NODE_URL=http://localhost:8545
       - APP_ADDRESS=0x88032398beab20017e61064af3c7c8bd38f4c968
       - PORT=8000
   mongodb:
     image: mongo:latest
+    network_mode: host
     expose:
       - 27017
   node:
     image: reputationnetwork/node
+    network_mode: host
     expose:
       - 8545
     ports:
       - 8545:8545
+  verifier:
+    image: reputationnetwork/verifier
+    network_mode: host
+    environment:
+      - BLOCKCHAIN_NODE_URL=http://localhost:8545
+      - VERIFIER_ADDRESS=0x44f1d336e4fdf189d2dadd963763883582c45312
+      - PORT=8082
+    expose:
+      - 8082
+    ports:
+      - 8082:8082
