@@ -33,7 +33,7 @@ end
 
 post '/upload' do
   signature = params[:signature]
-  image     = RTesseract.new(params[:file][:tempfile].path)
+  image = RTesseract.new(params[:file][:tempfile].path)
   data = mrz_data(image.to_s)
   if data
     store_document(settings.db, signature, data)
