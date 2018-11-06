@@ -32,9 +32,8 @@ get '/done' do
 end
 
 post '/upload' do
-  image     = RTesseract.new(params[:file][:tempfile].path)
   signature = params[:signature]
-
+  image     = RTesseract.new(params[:file][:tempfile].path)
   data = mrz_data(image.to_s)
   if data
     store_document(settings.db, signature, data)
@@ -42,6 +41,7 @@ post '/upload' do
   else
     'no data found'
   end
+  image.clean
 end
 
 get '/data' do

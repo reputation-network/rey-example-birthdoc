@@ -43,7 +43,6 @@ ADD Gemfile Gemfile.lock ./
 RUN bundle install
 ADD . .
 RUN sudo ln -nfs /usr/lib/x86_64-linux-gnu/libssl.so.1.0.2 /usr/lib/x86_64-linux-gnu/libssl.so
-RUN sudo chmod 777 -R tmp
 
 # service
 
