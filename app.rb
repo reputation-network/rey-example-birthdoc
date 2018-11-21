@@ -32,22 +32,16 @@ get '/done' do
 end
 
 post '/upload' do
-  @filename = params[:file][:filename]
-  file = params[:file][:tempfile]
-  signature= params[:signature]
-
-  path = "./tmp/#{@filename}"
-  File.open(path, 'wb') do |f|
-    f.write(file.read)
-    image = RTesseract.new(path)
-    data = mrz_data(image.to_s)
-    if data
-      store_document(settings.db, signature, data)
-      redirect '/done'
-    else
-      'no data found'
-    end
+  signature = params[:signature]
+  image = RTesseract.new(params[:file][:tempfile].path)
+  data = mrz_data(image.to_s)
+  if data
+    store_document(settings.db, signature, data)
+    redirect '/done'
+  else
+    'no data found'
   end
+  image.clean
 end
 
 get '/data' do
