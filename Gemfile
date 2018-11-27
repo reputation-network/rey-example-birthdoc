@@ -4,23 +4,14 @@ source "https://rubygems.org"
 
 
 gem "rtesseract", "~> 2.2"
-
 gem "rmagick", "~> 2.16"
-
+gem 'rack', '~> 2.0.6'
 gem "sinatra", "~> 2.0"
-
 gem "haml", "~> 5.0"
-
 gem "byebug", "~> 10.0"
-
 gem "sinatra-contrib", "~> 2.0"
-
 gem "mongo", "~> 2.6"
-
 gem "eth", "~> 0.4.8"
-
 gem 'bigdecimal'
-
 gem 'thin'
-
 gem "identification", "~> 0.1.0"
